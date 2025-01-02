@@ -1,0 +1,77 @@
+CREATE TABLE VENDAS (
+  CODIGO_VENDA INT PRIMARY KEY,
+  CODIGO_PRODUTO INT,
+  QUANTIDADE INT NOT NULL,
+  DATA_VENDA DATE NOT NULL,
+  FOREIGN KEY (CODIGO_PRODUTO) REFERENCES PRODUTOS(CODIGO)
+);
+```
+
+Criar Procedimento Armazenado
+```
+CREATE PROCEDURE RELATORIO_VENDAS_DIARIAS()
+BEGIN
+  SELECT 
+    DATA_VENDA, 
+    CODIGO_PRODUTO, 
+    SUM(QUANTIDADE) AS QUANTIDADE_VENDIDA
+  FROM 
+    VENDAS
+  GROUP BY 
+    DATA_VENDA, CODIGO_PRODUTO
+  ORDER BY 
+    DATA_VENDA;
+END;
+```
+
+Executar Procedimento
+```
+CALL RELATORIO_VENDAS_DIARIAS();
+```
+
+Parametrizar Data
+Para filtrar por data específica:
+
+```
+CREATE PROCEDURE RELATORIO_VENDAS_DIARIAS(IN DATA_VENDA_PARAM DATE)
+BEGIN
+  SELECT 
+    CODIGO_PRODUTO, 
+    SUM(QUANTIDADE) AS QUANTIDADE_VENDIDA
+  FROM 
+    VENDAS
+  WHERE 
+    DATA_VENDA = DATA_VENDA_PARAM
+  GROUP BY 
+    CODIGO_PRODUTO;
+END;
+```
+
+Executar Procedimento com Parâmetro
+```
+CALL RELATORIO_VENDAS_DIARIAS('2024-01-01');
+```
+
+Dicas
+1. Ajuste o procedimento conforme o seu banco de dados (MySQL, SQL Server, Oracle, etc.).
+2. Utilize índices nas colunas utilizadas em WHERE e JOIN.
+3. Otimize o procedimento com base no volume de dados.
+4. Crie um agendamento (cron job) para executar o procedimento diariamente.
+
+Exemplo com MySQL
+Para executar o procedimento automaticamente todos os dias:
+
+```
+bash
+Abrir crontab
+crontab -e
+
+Adicionar linha
+0 8 * * * mysql -u usuario -p senha banco_de_dados < procedimento.sql
+```
+
+O arquivo "procedimento.sql" deve conter:
+
+```
+CALL RELATORIO_VENDAS_DIARIAS();
+```
